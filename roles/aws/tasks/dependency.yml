@@ -1,0 +1,16 @@
+---
+
+- name: Install Python-Pip
+  yum:
+    name: python-pip
+    state: present
+  
+- name: Install Boto
+  pip:
+    name: boto
+    state: present
+
+- name: Install Docker-Py
+  pip:
+    name: docker-py
+    state: present

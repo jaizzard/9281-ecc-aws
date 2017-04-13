@@ -1,5 +1,7 @@
 ---
 
+- include: dependency.yml
+
 - name: Create AWS Keypair
   ec2_key:
     aws_access_key: "{{ aws.aws_access_key }}"
