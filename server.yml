@@ -1,0 +1,7 @@
+---
+
+- hosts: wordpress-server
+  become: True
+  remote_user: root
+  roles:
+    - wordpress

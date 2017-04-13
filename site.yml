@@ -1,0 +1,9 @@
+---
+
+- include: init.yml
+- include: server.yml
+#- hosts: all
+#  become: true
+#  roles:
+#    - aws
+#    - wordpress

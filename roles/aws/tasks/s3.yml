@@ -1,0 +1,26 @@
+---
+
+- name: test
+  debug:
+    msg: "{{ aws }}"
+
+- name: Launch EC2 Instance for WordPress
+  s3:
+    aws_access_key: "{{ aws.aws_access_key }}"
+    aws_secret_key: "{{ aws.aws_secret_key }}"
+    key_name: john.izzard
+    instance_type: "{{ ec2.instance_type }}"
+    image: "{{ ec2.image }}"
+    wait: "{{ ec2.wait }}"
+    count: "{{ ec2.count }}"
+    instance_tags: "{{ ec2.instance_tags }}"
+    assign_public_ip: "{{ ec2.assign_public_ip }}"
+    vpc_subnet_id: subnet-96b152cd
+    volumes: "{{ ec2.volumes }}"
+    group: test
+    region: us-west-2
+  register: ec2_wordpress
+
+- name: Install WordPress Docker Server
+  debug:
+    msg: "{{ ec2_wordpress }}"

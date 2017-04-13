@@ -1,0 +1,9 @@
+---
+
+aws:
+  aws_access_key:
+  aws_secret_key:
+
+pk: /etc/ssh/ansible.pem
+user: root
+ansible_ssh_private_key_file: "{{ pk }}"
