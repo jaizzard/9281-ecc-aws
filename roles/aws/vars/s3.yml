@@ -1,7 +1,0 @@
----
-
-s3:
-  server_specs:
-    bucket: ec2-server-specs
-    object: /ec2-wordpress.json
-  

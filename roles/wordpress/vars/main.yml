@@ -1,0 +1,14 @@
+---
+
+secrets:
+  mysql_root_password:
+
+wordpress_db:
+  container_name: wordpress-db
+  container_image: mariadb
+
+wordpress:
+  container_name: wordpress-server
+  container_image: wordpress
+  ports:
+    - 8080:80

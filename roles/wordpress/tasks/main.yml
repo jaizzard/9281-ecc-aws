@@ -1,12 +1,9 @@
 ---
 
-
-- name: Install EPEL repo.
-  yum:
-    name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
-    state: present
-
-- include: roles/wordpress/tasks/dependency.yml
+- name: Install Dependendies
+  include_role:
+    name: common
+    tasks_from: dependency
 
 - name: Install RHEL Docker
   yum:
@@ -14,35 +11,25 @@
     enablerepo: rhui-REGION-rhel-server-extras,rhui-REGION-rhel-server-optional
     state: latest
 
-#- name: Add Docker config
-#  copy:
-#    src: docker
-#    dest: /etc/sysconfig/docker
-#    owner: root
-#    group: root
-#    mode: 0644
-
 - name: Start and Enable Docker
   systemd:
     name: docker
     enabled: yes
     state: started
 
-- name: Isntall MariaDB for WordPress
+- name: Install and Start the WordPress-Database Docker Container
   docker_container:
-    name: wordpress-db
-    image: mariadb
+    name: "{{ wordpress_db.container_name }}"
+    image: "{{ wordpress_db.container_image }}"
     state: started
     env:
-      MYSQL_ROOT_PASSWORD: password
-   
+      MYSQL_ROOT_PASSWORD: "{{ secrets.mysql_root_password }}"
 
-- name: Install WordPress Docker Container
+- name: Install and Start the WordPress-Server Docker Container
   docker_container:
-    name: wordpress-server
-    image: wordpress
+    name: "{{ wordpress.container_name }}"
+    image: "{{ wordpress.container_image }}"
     state: started
     links: 
-      - wordpress-db:mysql
-    ports:
-      - 8080:80
+      - "{{ wordpress_db.container_name }}:mysql"
+    ports: "{{ wordpress.ports }}"

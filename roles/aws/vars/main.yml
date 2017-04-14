@@ -1,27 +1,42 @@
 ---
 
-aws:
-  aws_access_key:
-  aws_secret_key:
+s3:
+  server_specs:
+    bucket: ec2-server-specs
+    object: ec2-wordpress.json
 
-include_vars: ec2.yml
-include_vars: s3.yml
-
-# ec2:
-  # instance_type: t2.micro
-  # image: ami-6f68cf0f
-  # count: 1
-  # wait: yes
-  # assign_public_ip: yes
-  # instance_tags:
-    # Name: ecc-wordpress
-    # Owner: Aero-Reapers
-    # Initials: AJ
-    # Unit: ECC-9281
-    # Period: Semester-1.2017
-  # volumes:
-    # - device_name: /dev/xvda
-      # volume_type: gp2
-      # volume_size: 10
-      # delete_on_termination: yes
-    
+ec2:
+  instance_type: t2.micro
+  image: ami-6f68cf0f
+  region: us-west-2
+  vpc_id: vpc-e4b89c83 
+  vpc_subnet_id: subnet-96b152cd
+  
+  wordpress:
+    count: 1
+    wait: yes
+    assign_public_ip: yes
+    group: 
+      - name: wordpress
+        description: Allow inbound traffic for HTTP 8080 for Wordpress
+        rules:
+          - proto: tcp
+            from_port: 8080
+            to_port: 8080
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+    key_name: wordpress
+    instance_tags:
+      Name: ecc-wordpress
+      Owner: Aero-Reapers
+      Initials: AJ
+      Unit: ECC-9281
+      Period: Semester-1.2017
+    volumes:
+      - device_name: /dev/xvda
+        volume_type: gp2
+        volume_size: 10
+        delete_on_termination: yes

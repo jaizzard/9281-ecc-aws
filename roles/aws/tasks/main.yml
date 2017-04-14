@@ -1,6 +1,10 @@
 ---
 
-- include: dependency.yml
+- name: Install Dependencies
+  include_role:
+    name: common
+    tasks_from: dependency
+
 - include: s3.yml
 - include: ec2.yml
  
