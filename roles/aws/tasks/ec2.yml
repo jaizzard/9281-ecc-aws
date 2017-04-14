@@ -6,15 +6,11 @@
   ec2_group:
     aws_access_key: "{{ aws.aws_access_key }}"
     aws_secret_key: "{{ aws.aws_secret_key }}"
-    name: 
-    description: 
-    vpc_id: 
+    name: "{{ ec2.wordpress.group.name }}"
+    description: "{{ ec2.wordpress.group.description }}"
+    vpc_id: "{{ ec2.vpc_id }}"
     region: "{{ ec2.region }}"
-    rules:
-      - proto: http
-        from_port: 8080
-        to_port: 8080
-        cidr_ip: 0.0.0.0/0
+    rules: "{{ ec2.wordpress.group.rules }}"
   tags:
     - ec2
     - wordpress
@@ -27,7 +23,7 @@
     name: "{{ ec2.wordpress.key_name }}"
     state: present
     region: "{{ ec2.region }}"
-  register: wordpass_keypair
+  register: keypair_results
   notify:
     - Write EC2 Private key to Host
   tags:
@@ -39,9 +35,9 @@
   s3:
     aws_access_key: "{{ aws.aws_access_key }}"
     aws_secret_key: "{{ aws.aws_secret_key }}"
-    bucket: "{{ s3.server-specs.bucket }}"
-    object: "{{ s3.server-specs.object }}"
-    dest: "/tmp/{{ s3.server-specs.object }}"
+    bucket: "{{ s3.server_specs.bucket }}"
+    object: "{{ s3.server_specs.object }}"
+    dest: "/tmp/{{ s3.server_specs.object }}"
     mode: get
   register: s3_results
   ignore_errors: true
@@ -49,7 +45,7 @@
     - test
 
 - name: Load the EC2 Specs into Memory
-  include_vars: "/tmp/{{ s3.server-specs.object }}"
+  include_vars: "/tmp/{{ s3.server_specs.object }}"
   when: "not {{ s3_results|failed }}"
 
 - name: Check if the EC2 Instance Exists
@@ -60,7 +56,7 @@
       instance-id: "{{ instance_ids[0] }}"
     region: "{{ ec2.region }}"
   when: "{{ instance_ids[0] is defined }}"
-  register: facts
+  register: ec2_existence_results
   tags:
     - testing
 
@@ -80,20 +76,19 @@
     volumes: "{{ ec2.wordpress.volumes }}"
     group: "{{ ec2.wordpress.group }}"
   when:
-    - "{{ facts|skipped or facts.instances[0].state in ['terminated', 'shutting-down']}}"
-  register: ec2_wordpress
+    - "{{ ec2_existence_results|skipped or ec2_existence_results.instances[0].state in ['terminated', 'shutting-down']}}"
+  register: ec2_wordpress_instance
   notify:
     - Write EC2 WordPress Specs to File
     - Put EC2 WordPress Specs into S3
   tags:
     - ec2
   
-- name: Load the file
-  include_vars: /tmp/wordpress_instance
+- name: Load the EC2 Specs into Memory
+  include_vars: "/tmp/{{ s3.server_specs.object }}"
 
 - name: Waiting on SSH
-  local_action: wait_for
-  args:
+  wait_for:
     host: "{{ instances[0].private_ip }}"
     port: 22
     timeout: 300
@@ -103,4 +98,4 @@
   local_action: add_host
   args:
     name: "{{ instances[0].private_ip }}"
-    group: "wordpress-server"
+    group: "{{ hosts.wordpress_server }}"

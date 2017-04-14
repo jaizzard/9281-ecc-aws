@@ -3,5 +3,7 @@
 aws:
   aws_access_key:
   aws_secret_key:
+  private_key_file: /etc/ssh/ansible.pem
 
-pk: /home/ec2-user/.ssh/ansible.pem
+hosts:
+  wordpress_server: wordpress-server
