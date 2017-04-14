@@ -130,6 +130,7 @@
     - ssh
 
 - name: Adding IP of newly created instance to inventory
+  check_mode: no
   add_host:
     name: "{{ instances[0].private_ip }}"
     group: "{{ hosts.wordpress_server }}"
