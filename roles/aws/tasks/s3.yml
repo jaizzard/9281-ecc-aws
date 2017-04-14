@@ -5,3 +5,6 @@
     aws_access_key: "{{ aws.aws_access_key }}"
     aws_secret_key: "{{ aws.aws_secret_key }}"
     name: "{{ s3.server_specs.bucket }}"
+  tags:
+    - s3
+    - s3-create

@@ -4,18 +4,30 @@
   include_role:
     name: common
     tasks_from: dependency
+  tags:
+    - docker
+    - wordpress
+    - wordpress-db
 
 - name: Install RHEL Docker
   yum:
     name: docker
     enablerepo: rhui-REGION-rhel-server-extras,rhui-REGION-rhel-server-optional
     state: latest
+  tags:
+    - docker
+    - wordpress
+    - wordpress-db
 
 - name: Start and Enable Docker
   systemd:
     name: docker
     enabled: yes
     state: started
+  tags:
+    - docker
+    - wordpress
+    - wordpress-db
 
 - name: Install and Start the WordPress-Database Docker Container
   docker_container:
@@ -24,6 +36,10 @@
     state: started
     env:
       MYSQL_ROOT_PASSWORD: "{{ secrets.mysql_root_password }}"
+  tags:
+    - docker
+    - wordpress-db
+    - wordpress-db-start
 
 - name: Install and Start the WordPress-Server Docker Container
   docker_container:
@@ -33,3 +49,7 @@
     links: 
       - "{{ wordpress_db.container_name }}:mysql"
     ports: "{{ wordpress.ports }}"
+  tags:
+    - docker
+    - wordpress
+    - wordpress-start
