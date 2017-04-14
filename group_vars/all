@@ -5,5 +5,3 @@ aws:
   aws_secret_key:
 
 pk: /home/ec2-user/.ssh/ansible.pem
-#user: root
-#ansible_ssh_private_key_file: "{{ pk }}"

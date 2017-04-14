@@ -1,0 +1,23 @@
+---
+
+- name: Write Private Key
+  copy:
+     content: "{{ wordpass_keypair.key.private_key }}"
+     dest: "{{ pk }}"
+#  when: "{{ wordpass_keypair.changed }}"
+  
+- name: Write EC2 WordPress Specs to File
+  copy:
+    content: "{{ ec2_wordpress }}"
+    dest: "/tmp/{{ s3.server-specs.object }}"
+#  when: "{{ not ec2_wordpress|skipped }}"
+
+- name: Put EC2 WordPress Specs into S3
+  s3:
+    aws_access_key: "{{ aws.aws_access_key }}"
+    aws_secret_key: "{{ aws.aws_secret_key }}"
+    bucket: "{{ s3.server-specs.bucket }}"
+    object: "{{ s3.server-specs.object }}"
+    src: "/tmp/{{ s3.server-specs.object }}"
+    mode: put
+#  when: "{{ not ec2_wordpress|skipped }}"

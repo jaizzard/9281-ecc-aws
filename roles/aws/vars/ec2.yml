@@ -1,0 +1,25 @@
+---
+
+ec2:
+  instance_type: t2.micro
+  image: ami-6f68cf0f
+  region: us-west-2
+  vpc_subnet_id: subnet-96b152cd
+  
+  wordpress:
+    count: 1
+    wait: yes
+    assign_public_ip: yes
+    group: wordpress
+    key_name: wordpress
+    instance_tags:
+      Name: ecc-wordpress
+      Owner: Aero-Reapers
+      Initials: AJ
+      Unit: ECC-9281
+      Period: Semester-1.2017
+    volumes:
+      - device_name: /dev/xvda
+        volume_type: gp2
+        volume_size: 10
+        delete_on_termination: yes

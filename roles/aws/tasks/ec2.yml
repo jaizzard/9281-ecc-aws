@@ -1,26 +1,106 @@
 ---
 
-- name: test
-  debug:
-    msg: "{{ aws }}"
+- include_vars: ec2.yml
+
+- name: Create EC2 Security Group for WordPress
+  ec2_group:
+    aws_access_key: "{{ aws.aws_access_key }}"
+    aws_secret_key: "{{ aws.aws_secret_key }}"
+    name: 
+    description: 
+    vpc_id: 
+    region: "{{ ec2.region }}"
+    rules:
+      - proto: http
+        from_port: 8080
+        to_port: 8080
+        cidr_ip: 0.0.0.0/0
+  tags:
+    - ec2
+    - wordpress
+    - security-group
+    
+- name: Create EC2 Keypair for WordPress
+  ec2_key:
+    aws_access_key: "{{ aws.aws_access_key }}"
+    aws_secret_key: "{{ aws.aws_secret_key }}"
+    name: "{{ ec2.wordpress.key_name }}"
+    state: present
+    region: "{{ ec2.region }}"
+  register: wordpass_keypair
+  notify:
+    - Write EC2 Private key to Host
+  tags:
+    - ec2
+    - wordpress
+    - key-pair
+
+- name: Check if WordPress Instance file Exists and Download
+  s3:
+    aws_access_key: "{{ aws.aws_access_key }}"
+    aws_secret_key: "{{ aws.aws_secret_key }}"
+    bucket: "{{ s3.server-specs.bucket }}"
+    object: "{{ s3.server-specs.object }}"
+    dest: "/tmp/{{ s3.server-specs.object }}"
+    mode: get
+  register: s3_results
+  ignore_errors: true
+  tags:
+    - test
+
+- name: Load the EC2 Specs into Memory
+  include_vars: "/tmp/{{ s3.server-specs.object }}"
+  when: "not {{ s3_results|failed }}"
+
+- name: Check if the EC2 Instance Exists
+  ec2_remote_facts:
+    aws_access_key: "{{ aws.aws_access_key }}"
+    aws_secret_key: "{{ aws.aws_secret_key }}"
+    filters:
+      instance-id: "{{ instance_ids[0] }}"
+    region: "{{ ec2.region }}"
+  when: "{{ instance_ids[0] is defined }}"
+  register: facts
+  tags:
+    - testing
 
 - name: Launch EC2 Instance for WordPress
   ec2:
     aws_access_key: "{{ aws.aws_access_key }}"
     aws_secret_key: "{{ aws.aws_secret_key }}"
-    key_name: john.izzard
     instance_type: "{{ ec2.instance_type }}"
     image: "{{ ec2.image }}"
-    wait: "{{ ec2.wait }}"
-    count: "{{ ec2.count }}"
-    instance_tags: "{{ ec2.instance_tags }}"
-    assign_public_ip: "{{ ec2.assign_public_ip }}"
-    vpc_subnet_id: subnet-96b152cd
-    volumes: "{{ ec2.volumes }}"
-    group: test
-    region: us-west-2
+    region: "{{ ec2.region }}" 
+    key_name: "{{ ec2.wordpress.key_name }}"
+    wait: "{{ ec2.wordpress.wait }}"
+    count: "{{ ec2.wordpress.count }}"
+    instance_tags: "{{ ec2.wordpress.instance_tags }}"
+    assign_public_ip: "{{ ec2.wordpress.assign_public_ip }}"
+    vpc_subnet_id: "{{ ec2.wordpress.vpc_subnet_id }}"
+    volumes: "{{ ec2.wordpress.volumes }}"
+    group: "{{ ec2.wordpress.group }}"
+  when:
+    - "{{ facts|skipped or facts.instances[0].state in ['terminated', 'shutting-down']}}"
   register: ec2_wordpress
+  notify:
+    - Write EC2 WordPress Specs to File
+    - Put EC2 WordPress Specs into S3
+  tags:
+    - ec2
+  
+- name: Load the file
+  include_vars: /tmp/wordpress_instance
 
-- name: Install WordPress Docker Server
-  debug:
-    msg: "{{ ec2_wordpress }}"
+- name: Waiting on SSH
+  local_action: wait_for
+  args:
+    host: "{{ instances[0].private_ip }}"
+    port: 22
+    timeout: 300
+    state: started
+
+- name: Adding IP of newly created instance to inventory
+  local_action: add_host
+  args:
+    name: "{{ instances[0].private_ip }}"
+    group: "wordpress-server"
