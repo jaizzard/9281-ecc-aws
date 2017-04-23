@@ -2,9 +2,9 @@
 
 aws:
   aws_access_key:
-  aws_secret_key:
+#  aws_secret_key:
 
-private_key_file: /home/ec2-user/.ssh/aws_wordpass.pem
+#private_key_file: /home/ec2-user/.ssh/aws_wordpass.pem
 
 hosts:
   wordpress_server: wordpress-server

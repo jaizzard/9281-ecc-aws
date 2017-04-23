@@ -2,12 +2,12 @@
 
 - name: Create EC2 Security Group for WordPress
   ec2_group:
-    aws_access_key: "{{ aws.aws_access_key }}"
-    aws_secret_key: "{{ aws.aws_secret_key }}"
+    #aws_access_key: "{{ aws.aws_access_key }}"
+    #aws_secret_key: "{{ aws.aws_secret_key }}"
     name: "{{ item.name }}"
     description: "{{ item.description }}"
     vpc_id: "{{ ec2.vpc_id }}"
-    region: "{{ ec2.region }}"
+    #region: "{{ ec2.region }}"
     rules: "{{ item.rules }}"
   with_items: "{{ ec2.wordpress.group }}"
   tags:
@@ -19,7 +19,7 @@
     aws_access_key: "{{ aws.aws_access_key }}"
     aws_secret_key: "{{ aws.aws_secret_key }}"
     name: "{{ ec2.wordpress.key_name }}"
-    state: present
+    #state: present
     region: "{{ ec2.region }}"
   register: keypair_results
   tags:
@@ -42,8 +42,8 @@
   s3:
     aws_access_key: "{{ aws.aws_access_key }}"
     aws_secret_key: "{{ aws.aws_secret_key }}"
-    bucket: "{{ s3.server_specs.bucket }}"
-    object: "{{ s3.server_specs.object }}"
+    #bucket: "{{ s3.server_specs.bucket }}"
+    #object: "{{ s3.server_specs.object }}"
     dest: "/tmp/{{ s3.server_specs.object }}"
     mode: get
   register: s3_results
@@ -80,11 +80,11 @@
     instance_type: "{{ ec2.instance_type }}"
     image: "{{ ec2.image }}"
     region: "{{ ec2.region }}" 
-    key_name: "{{ ec2.wordpress.key_name }}"
+    #key_name: "{{ ec2.wordpress.key_name }}"
     wait: "{{ ec2.wordpress.wait }}"
     count: "{{ ec2.wordpress.count }}"
     instance_tags: "{{ ec2.wordpress.instance_tags }}"
-    assign_public_ip: "{{ ec2.wordpress.assign_public_ip }}"
+    #assign_public_ip: "{{ ec2.wordpress.assign_public_ip }}"
     vpc_subnet_id: "{{ ec2.vpc_subnet_id }}"
     volumes: "{{ ec2.wordpress.volumes }}"
     group: "{{ ec2.wordpress.group[0].name }}"
@@ -129,8 +129,8 @@
   tags:
     - ssh
 
-- name: Adding IP of newly created instance to inventory
-  check_mode: no
-  add_host:
-    name: "{{ instances[0].private_ip }}"
-    group: "{{ hosts.wordpress_server }}"
+#- name: Adding IP of newly created instance to inventory
+#  check_mode: no
+#  add_host:
+#    name: "{{ instances[0].private_ip }}"
+#    group: "{{ hosts.wordpress_server }}"

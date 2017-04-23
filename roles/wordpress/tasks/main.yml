@@ -9,15 +9,15 @@
     - wordpress
     - wordpress-db
 
-- name: Install RHEL Docker
-  yum:
-    name: docker
-    enablerepo: rhui-REGION-rhel-server-extras,rhui-REGION-rhel-server-optional
-    state: latest
-  tags:
-    - docker
-    - wordpress
-    - wordpress-db
+#- name: Install RHEL Docker
+#  yum:
+#    name: docker
+#    enablerepo: rhui-REGION-rhel-server-extras,rhui-REGION-rhel-server-optional
+#    state: latest
+#  tags:
+#    - docker
+#    - wordpress
+#    - wordpress-db
 
 - name: Start and Enable Docker
   systemd:
@@ -34,8 +34,8 @@
     name: "{{ wordpress_db.container_name }}"
     image: "{{ wordpress_db.container_image }}"
     state: started
-    env:
-      MYSQL_ROOT_PASSWORD: "{{ secrets.mysql_root_password }}"
+    #env:
+      #MYSQL_ROOT_PASSWORD: "{{ secrets.mysql_root_password }}"
   tags:
     - docker
     - wordpress-db
@@ -45,7 +45,7 @@
   docker_container:
     name: "{{ wordpress.container_name }}"
     image: "{{ wordpress.container_image }}"
-    state: started
+    #state: started
     links: 
       - "{{ wordpress_db.container_name }}:mysql"
     ports: "{{ wordpress.ports }}"
