@@ -31,10 +31,7 @@ ec2:
     key_name: wordpress
     instance_tags:
       Name: ecc-wordpress
-      Owner: Aero-Reapers
-      Initials: AJ
-      Unit: ECC-9281
-      Period: Semester-1.2017
+      Owner: "{{ ec2_owner }}"
     volumes:
       - device_name: /dev/xvda
         volume_type: gp2
